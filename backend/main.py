@@ -19,7 +19,7 @@ logger = logging.getLogger("uvicorn.error")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////data/app.db")
 MODEL = os.getenv("LLM_MODEL", "gemini/gemini-3-flash-preview")
 ENABLE_FAILURE_SIMULATION = os.getenv("ENABLE_FAILURE_SIMULATION", "false").lower() == "true"
-ALLOWED_ORIGINS = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",") if x.strip()]
+ALLOWED_ORIGINS = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "*").split(",") if x.strip()]
 
 # LiteLLM built-in in-memory cache.
 litellm.cache = litellm.Cache(type="local")
@@ -88,8 +88,8 @@ class ChatRequest(BaseModel):
 app = FastAPI(title="Lyftr LLM Chatbot")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"] if "*" in ALLOWED_ORIGINS else ALLOWED_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -73,7 +73,7 @@ Check history with `GET /sessions/demo/messages`. Input and output tokens are sh
 4. Deploy the service and copy its public URL, for example `https://lyftr-backend.onrender.com`.
 5. Set `ALLOWED_ORIGINS` to the exact Vercel frontend URL (without a trailing slash), for example `https://lyftr.vercel.app`.
 
-The Render blueprint mounts SQLite at `/data/app.db`. Persistent disks require a paid Render web service. On the free tier, data can be lost during redeploys or restarts; use an external database for production persistence.
+The free blueprint runs SQLite at `/data/app.db`, but the filesystem is ephemeral. Chat history may be lost during redeploys, restarts, or free-service rebuilds. For persistent production storage, add an external database or upgrade to a Render paid persistent disk.
 
 ### Deploy the frontend to Vercel
 1. Import the same GitHub repository in Vercel.

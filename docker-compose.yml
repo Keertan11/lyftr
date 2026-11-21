@@ -5,7 +5,7 @@ services:
     environment:
       LLM_API_KEYS: ${LLM_API_KEYS:-}
       DATABASE_URL: ${DATABASE_URL:-sqlite:////data/app.db}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
       ENABLE_FAILURE_SIMULATION: ${ENABLE_FAILURE_SIMULATION:-true}
       LLM_MODEL: ${LLM_MODEL:-gemini/gemini-3-flash-preview}
     ports:

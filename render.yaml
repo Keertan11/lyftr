@@ -9,7 +9,7 @@ services:
       - key: DATABASE_URL
         value: sqlite:////data/app.db
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: '*'
       - key: ENABLE_FAILURE_SIMULATION
         value: true
       - key: LLM_MODEL
