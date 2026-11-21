@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger("uvicorn.error")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////data/app.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
 MODEL = os.getenv("LLM_MODEL", "gemini/gemini-3-flash-preview")
 ENABLE_FAILURE_SIMULATION = os.getenv("ENABLE_FAILURE_SIMULATION", "false").lower() == "true"
 ALLOWED_ORIGINS = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "*").split(",") if x.strip()]
