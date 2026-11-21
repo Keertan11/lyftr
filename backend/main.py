@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 import os
 import sqlite3
 import time
@@ -13,8 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
+logger = logging.getLogger("uvicorn.error")
+
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////data/app.db")
-MODEL = os.getenv("LLM_MODEL", "gemini/gemini-2.0-flash")
+MODEL = os.getenv("LLM_MODEL", "gemini/gemini-3-flash-preview")
 ENABLE_FAILURE_SIMULATION = os.getenv("ENABLE_FAILURE_SIMULATION", "false").lower() == "true"
 ALLOWED_ORIGINS = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",") if x.strip()]
 
@@ -158,9 +161,9 @@ def get_history(session_id: str) -> list[dict[str, str]]:
 def is_provider_error(error: Exception) -> bool:
     text = str(error).lower()
     status = getattr(error, "status_code", None)
-    if status in (429, 500, 502, 503):
+    if status in (404, 429, 500, 502, 503):
         return True
-    return any(token in text for token in ("429", "quota", "rate limit", "500", "502", "503", "internal server", "unavailable"))
+    return any(token in text for token in ("404", "not found", "429", "quota", "rate limit", "500", "502", "503", "internal server", "unavailable"))
 
 
 @app.exception_handler(Exception)
@@ -262,9 +265,7 @@ def chat(payload: ChatRequest, x_simulate_failure: Optional[str] = Header(defaul
                 answered_key = key_id
                 break
             except Exception as exc:
-                if is_provider_error(exc):
-                    failed_count += 1
-                    continue
+                logger.warning("Provider request failed for %s: %s (status=%s)", key_id, type(exc).__name__, getattr(exc, "status_code", None))
                 failed_count += 1
 
         if reply is None:

@@ -7,7 +7,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-sqlite:////data/app.db}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
       ENABLE_FAILURE_SIMULATION: ${ENABLE_FAILURE_SIMULATION:-true}
-      LLM_MODEL: ${LLM_MODEL:-gemini/gemini-2.0-flash}
+      LLM_MODEL: ${LLM_MODEL:-gemini/gemini-3-flash-preview}
     ports:
       - "8000:8000"
     volumes:
