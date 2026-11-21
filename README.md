@@ -43,10 +43,18 @@ cd backend
 pytest -q
 ```
 
+Or with Docker running:
+
+```bash
+docker compose exec backend pytest -q
+```
+
 ## 3. Design decisions: key fallback, caching, SQLite session storage
 FastAPI exposes exactly `/health`, `/chat`, and `/sessions/{session_id}/messages`. LiteLLM is configured with a local built-in cache and calls the Gemini model through each configured API key. The backend tries keys in order and records only provider-failure fallback attempts. An in-process cache additionally retains the reply and original token usage by an exact model-plus-full-message-list hash. SQLite stores user and assistant rows; an optional sessions table holds the session system prompt while the history endpoint excludes it.
 
 ## 4. Verification: how to see failover, cache hits and per-message token usage
+Use the **API failover demo** selector above the chat to simulate a key failure. Choose **Fail API key 1** to make the backend switch to key 2, or choose **Fail all API keys** to show the 503 error state. Assistant replies display the active API key and fallback count; when a switch occurs, a green **API switched** badge appears.
+
 Send the same message in two new sessions. The first response should be `LIVE_INFERENCE`; the second with identical system prompt and history should be `LLM_CACHE` and contain the same reply. Send these failover requests:
 
 ```bash
@@ -56,10 +64,27 @@ curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -H "
 
 Check history with `GET /sessions/demo/messages`. Input and output tokens are shown beneath every frontend assistant reply.
 
-## 5. Setup Used
+## 5. Deploy to Render and Vercel
+
+### Deploy the backend to Render
+1. Push the repository to GitHub.
+2. In Render, choose **New > Blueprint** and select the repository. Render reads [render.yaml](render.yaml).
+3. Set the `LLM_API_KEYS` secret in the Render dashboard. These should be real Gemini keys, with each key separated by a comma.
+4. Deploy the service and copy its public URL, for example `https://lyftr-backend.onrender.com`.
+5. Set `ALLOWED_ORIGINS` to the exact Vercel frontend URL (without a trailing slash), for example `https://lyftr.vercel.app`.
+
+The Render blueprint mounts SQLite at `/data/app.db`. Persistent disks require a paid Render web service. On the free tier, data can be lost during redeploys or restarts; use an external database for production persistence.
+
+### Deploy the frontend to Vercel
+1. Import the same GitHub repository in Vercel.
+2. Set **Root Directory** to `frontend`.
+3. Set `VITE_API_URL` to the Render backend URL, for example `https://lyftr-backend.onrender.com`.
+4. Deploy. Vite uses `VITE_API_URL` at build time.
+5. Copy the Vercel URL and add it to Render's `ALLOWED_ORIGINS`, then redeploy or restart the backend.
+
+The frontend can also use [frontend/vercel.json](frontend/vercel.json) for Vite SPA routing. Never put Gemini API keys in `VITE_*` variables or in frontend code: Vite variables are exposed to browsers.
+
+## 6. Setup Used
 Built in VS Code on Windows using Git, Docker Desktop, React/Vite, FastAPI, LiteLLM, SQLite, and AI-assisted implementation.
 
-## 6. Bonus features (if any)
-- Deterministic local demo replies when only placeholder/demo keys are configured, useful for UI and Docker verification.
-- System prompt persistence per session.
-- Responsive chat interface and visible 422/503 error messages.
+
