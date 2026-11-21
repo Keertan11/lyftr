@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './styles.css';
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
@@ -11,7 +13,9 @@ function AssistantMessage({ data, isError }) {
   return (
     <div className="message assistant" data-testid="assistant-message">
       {switched && <div className="switch-notice" data-testid="api-switch-notice">API switched to {m.key_id}</div>}
-      <div className="reply">{data.reply}</div>
+      <div className="reply markdown">
+        <Markdown remarkPlugins={[remarkGfm]}>{data.reply}</Markdown>
+      </div>
       <div className="metadata">
         <span data-testid="meta-source"><b>Source:</b> {m.resolution_source}</span>
         <span data-testid="meta-model"><b>Model:</b> {m.model}</span>
