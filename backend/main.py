@@ -158,13 +158,6 @@ def get_history(session_id: str) -> list[dict[str, str]]:
     return [{"role": row["role"], "content": row["content"]} for row in rows]
 
 
-def is_provider_error(error: Exception) -> bool:
-    text = str(error).lower()
-    status = getattr(error, "status_code", None)
-    if status in (404, 429, 500, 502, 503):
-        return True
-    return any(token in text for token in ("404", "not found", "429", "quota", "rate limit", "500", "502", "503", "internal server", "unavailable"))
-
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
